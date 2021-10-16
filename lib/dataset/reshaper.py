@@ -59,28 +59,31 @@ class Reshaper:
     def _remove_noises(self, image: Image.Image):
         img = np.asarray(image)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
         mask = self._make_mask(hsv)
+        height, width = mask.shape
 
         # TODO
-        h_target, w_target = np.where(mask > 0)
-
-        roop = [(j, i)
-                for j in range(-2, 2)
-                for i in range(-2, 2)]
-        for h, w in zip(h_target, w_target):
-            for j, i in roop:
-                h_min = h + j - 3
-                h_max = h + j + 3
-                w_min = w + i - 3
-                w_max = w + i + 3
-                med_val = np.median(img[h_min:h_max, w_min:w_max])
-                hsv[h + j, w + i] = med_val + random.randint(-3, 3)
-
-        img = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-
-        cv2.imshow('sample', img)
-        cv2.waitKey(0)
+        # x_target, y_target = np.where(mask > 0)
+        #
+        # roop = [(j, i) for j in range(-1, 2) for i in range(-1, 2)]
+        #
+        # for x, y in zip(x_target, y_target):
+        #     for j, i in roop:
+        #         x_min = x + j - 3
+        #         x_max = x + j + 3
+        #         y_min = y + i - 3
+        #         y_max = y + i + 3
+        #         if x_min < 0 or x_max > height or y_min < 0 or y_max > width:
+        #             continue
+        #         med_val = np.median(img[x_min:x_max, y_min:y_max])
+        #         print(med_val)
+        #         hsv[x + j, y + i] = med_val + random.randint(-3, 3)
+        #         # print(hsv[x, y])
+        #
+        # img = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+        #
+        # cv2.imshow('sample', img)
+        # cv2.waitKey(0)
 
         return hsv
 
@@ -92,7 +95,6 @@ class Reshaper:
         mask_yellow = cv2.inRange(image, yellow_l, yellow_u)
         mask = cv2.bitwise_or(mask_blue, mask_yellow)
         return mask
-
 
     def _calc_point(self, array: list):
         half = array[2] / 2
