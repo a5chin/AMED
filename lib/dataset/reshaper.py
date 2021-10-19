@@ -29,7 +29,6 @@ class Reshaper:
         for p in tqdm(self.path):
             self._read_data(p)
 
-
     def _read_data(self, path: Path):
         for p in (path / 'DICOM').glob('*.dcm'):
             ds = dcmread(p)
@@ -56,36 +55,22 @@ class Reshaper:
     def _in_same_image(self, _hash: imagehash.ImageHash) -> bool:
         return sum(1 for it in self.hashes if it - _hash < 2) != 0
 
-    def _remove_noises(self, image: Image.Image):
+    def _remove_noises(self, image: Image.Image, kernel_size: int=3, random_range: tuple=(-3, 3)) -> np.ndarray:
         img = np.asarray(image)
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(np.asarray(img), cv2.COLOR_BGR2HSV)
+
         mask = self._make_mask(hsv)
         height, width = mask.shape
+        x_target, y_target = np.where(mask > 0)
 
-        # TODO
-        # x_target, y_target = np.where(mask > 0)
-        #
-        # roop = [(j, i) for j in range(-1, 2) for i in range(-1, 2)]
-        #
-        # for x, y in zip(x_target, y_target):
-        #     for j, i in roop:
-        #         x_min = x + j - 3
-        #         x_max = x + j + 3
-        #         y_min = y + i - 3
-        #         y_max = y + i + 3
-        #         if x_min < 0 or x_max > height or y_min < 0 or y_max > width:
-        #             continue
-        #         med_val = np.median(img[x_min:x_max, y_min:y_max])
-        #         print(med_val)
-        #         hsv[x + j, y + i] = med_val + random.randint(-3, 3)
-        #         # print(hsv[x, y])
-        #
-        # img = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-        #
-        # cv2.imshow('sample', img)
-        # cv2.waitKey(0)
+        for x, y in zip(x_target, y_target):
+            x_min, x_max = x - kernel_size, x + kernel_size
+            y_min, y_max = y - kernel_size, y + kernel_size
+            if x_min < 0 or width < x_max or y_min < 0 or height < y_max:
+                continue
+            img[x, y] = np.median(img[x_min: x_max, y_min: y_max]) + random.randint(*random_range)
 
-        return hsv
+        return img
 
     def _make_mask(self, image: np.ndarray) -> np.ndarray:
         blue_l, blue_u = np.array([70, 20, 20]), np.array([100, 255, 255])
