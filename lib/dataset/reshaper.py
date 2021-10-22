@@ -4,60 +4,132 @@ import cv2
 import random
 import imagehash
 import json
+import re
 from imagehash import phash
 from pydicom import dcmread
 from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
-
+from sklearn.model_selection import train_test_split
 
 from lib.config import config
 
 
 class Reshaper:
-    def __init__(self, root: str=config.DATASET.ROOT):
+    def __init__(self, root: str = config.DATASET.ROOT):
         self.root = Path(root) / 'DICOM'
         self.path = [p for p in self.root.iterdir()]
-        self.path_images, self.path_annotations = Path(config.DATASET.IMAGES), Path(config.DATASET.ANNOTATIONS)
-        self.path_images.mkdir(exist_ok=True)
-        self.path_annotations.mkdir(exist_ok=True)
+        self.images_path, self.annotations_path = Path(config.DATASET.IMAGES), Path(config.DATASET.ANNOTATIONS)
+        self.images_path.mkdir(exist_ok=True)
+        self.annotations_path.mkdir(exist_ok=True)
         self.id = 0
         self.hashes = []
-        self.info = []
+        self.info = {
+            'info': {
+                'description': 'AMED Dataset',
+                'url': 'https://www.amed.go.jp',
+                'version': 1.0,
+                'year': 2021,
+                'contributor': 'Japan Agency for Medical Research and Development',
+                'data_created': '2021/10/22'
+            },
+            'licenses': [{
+                'url': 'https://www.amed.go.jp',
+                'id': 1,
+                'name': 'Japan Agency for Medical Research and Development'
+            }],
+            'images': [], 'annotations': [],
+            'categories': [
+                {
+                    'supercategory': 'cancer',
+                    'id': 1,
+                    'name': 'cyst'
+                },
+                {
+                    'supercategory': 'cancer',
+                    'id': 2,
+                    'name': 'hcc'
+                },
+                {
+                    'supercategory': 'cancer',
+                    'id': 3,
+                    'name': 'hemangioma'
+                },
+                {
+                    'supercategory': 'cancer',
+                    'id': 4,
+                    'name': 'meta'
+                },
+                {
+                    'supercategory': 'cancer',
+                    'id': 5,
+                    'name': 'other'
+                },
+            ]
+        }
 
     def organize(self):
         for p in tqdm(self.path):
             self._read_data(p)
 
+        with open(r'annotations.json') as f:
+            json.dump(self.info, f)
+
+        self._create_json()
+
     def _read_data(self, path: Path):
         for p in (path / 'DICOM').glob('*.dcm'):
-            ds = dcmread(p)
-            image = Image.fromarray(ds.pixel_array)
-            info = pd.read_csv(str(path / path.stem) + '.csv', header=None, encoding='shift-jis').values[0].tolist()
-            height, width = image.size
-            if height > 400 and width > 400:
-                _hash = phash(image)
-                if not self._in_same_image(_hash):
-                    _id = self.id
-                    self.id += 1
-                    annotations = (p.parents[1] / 'CUTIMAGE').glob('*.csv')
-                    for annotation in annotations:
-                        if str(p.stem) in str(annotation):
-                            df = pd.read_csv(annotation, header=None).to_numpy()[0]
-                            points = self._calc_point(df)
-                            self.info.append(
-                                {'id': _id, 'diagnosis': info[13], 'age': info[8], 'sex': 9, 'points': points, 'height': height, 'width': width}
-                            )
-                    self.hashes.append(_hash)
-                    self._remove_noises(image)
-                    # image.save(self.path_images / (str(_id).zfill(5) + '.png'))
+            try:
+                ds = dcmread(p)
+                image = Image.fromarray(ds.pixel_array)
+                info = pd.read_csv(str(path / path.stem) + '.csv', header=None, encoding='shift-jis').values[0].tolist()
+                width, height = image.size
+                if height > 400 and width > 400:
+                    _hash = phash(image)
+                    if not self._in_same_image(_hash):
+                        _id = self.id
+                        self.id += 1
+                        annotations = (p.parents[1] / 'CUTIMAGE').glob('*.csv')
+                        for annotation in annotations:
+                            if str(p.stem) in str(annotation):
+                                df = pd.read_csv(annotation, header=None).to_numpy()[0]
+                                points = self._calc_point(df)
+
+                                self.info['images'].append({
+                                    'licenses': 1,
+                                    'file_name': str(_id).zfill(6) + '.jpg',
+                                    'height': height,
+                                    'width': width,
+                                    'id': _id
+                                })
+                                self.info['annotations'].append({
+                                    'iscrowd': 0,
+                                    'image_id': _id,
+                                    'bbox': points,
+                                    'category_id': self._convert_diagnosis(info[13]),
+                                    'id': _id,
+                                    'age': int(re.sub(r"\D", "", ds.PatientAge)),
+                                    'sex': 1 if ds.PatientSex == 'M' else 0
+                                })
+
+                        self.hashes.append(_hash)
+
+                        image = self._remove_noises(image)
+                        image.save(self.images_path / (str(_id).zfill(6) + '.jpg'))
+            except:
+                pass
 
     def _in_same_image(self, _hash: imagehash.ImageHash) -> bool:
         return sum(1 for it in self.hashes if it - _hash < 2) != 0
 
-    def _remove_noises(self, image: Image.Image, kernel_size: int=3, random_range: tuple=(-3, 3)) -> np.ndarray:
-        img = np.asarray(image)
-        hsv = cv2.cvtColor(np.asarray(img), cv2.COLOR_BGR2HSV)
+    def _remove_noises(self, image: Image.Image, kernel_size: int = 3, random_range: tuple = (-3, 3)) -> Image.Image:
+        img = np.asarray(image, dtype=np.uint8)
+
+        try:
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        except:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
         mask = self._make_mask(hsv)
         height, width = mask.shape
@@ -70,9 +142,10 @@ class Reshaper:
                 continue
             img[x, y] = np.median(img[x_min: x_max, y_min: y_max]) + random.randint(*random_range)
 
-        return img
+        return Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
-    def _make_mask(self, image: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def _make_mask(image: np.ndarray) -> np.ndarray:
         blue_l, blue_u = np.array([70, 20, 20]), np.array([100, 255, 255])
         yellow_l, yellow_u = np.array([20, 20, 40]), np.array([40, 255, 255])
 
@@ -81,6 +154,24 @@ class Reshaper:
         mask = cv2.bitwise_or(mask_blue, mask_yellow)
         return mask
 
-    def _calc_point(self, array: list):
+    @staticmethod
+    def _calc_point(array: list) -> list:
         half = array[2] / 2
-        return [array[0] - half, array[1] - half, array[0] + half, array[1] + half]
+        return [array[0] - half, array[1] - half, half * 2, half * 2]
+
+    def _create_json(self):
+        d = {}
+        train, d['test'] = train_test_split(self.info, train_size=0.6)
+        d['train'], d['validation'] = train_test_split(self.info, train_size=0.5)
+        for typ in d.keys():
+            with open(r'//aka/work/hara.e/AMED/lib/dataset/annotations/' + typ + '.json') as f:
+                json.dump(d[typ], f)
+
+    @staticmethod
+    def _convert_diagnosis(diagnosis: str):
+        name = ['単純嚢胞', ' 肝細胞癌', '血管腫', '転移性癌']
+        if diagnosis in name:
+            diagnosis = name.index(diagnosis) + 1
+        else:
+            diagnosis = 5
+        return diagnosis
