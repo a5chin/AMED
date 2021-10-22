@@ -4,9 +4,9 @@ _C = CN()
 
 _C.DATASET = CN()
 _C.DATASET.NAME = 'AMED'
-_C.DATASET.ROOT = r'\\aka\work\hara.e\AMED\lib\dataset'
-_C.DATASET.IMAGES = _C.DATASET.ROOT + r'\images'
-_C.DATASET.ANNOTATIONS = _C.DATASET.ROOT + r'\annotations'
+_C.DATASET.ROOT = r'//aka/work/hara.e/AMED/lib/dataset'
+_C.DATASET.IMAGES = _C.DATASET.ROOT + r'/images'
+_C.DATASET.ANNOTATIONS = _C.DATASET.ROOT + r'/annotations'
 _C.DATASET.BATCH_SIZE = 1
 
 
