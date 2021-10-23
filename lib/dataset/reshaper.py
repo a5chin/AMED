@@ -72,9 +72,6 @@ class Reshaper:
         for p in tqdm(self.path):
             self._read_data(p)
 
-        with open(r'annotations.json') as f:
-            json.dump(self.info, f)
-
         self._create_json()
 
     def _read_data(self, path: Path):
@@ -160,12 +157,8 @@ class Reshaper:
         return [array[0] - half, array[1] - half, half * 2, half * 2]
 
     def _create_json(self):
-        d = {}
-        train, d['test'] = train_test_split(self.info, train_size=0.6)
-        d['train'], d['validation'] = train_test_split(self.info, train_size=0.5)
-        for typ in d.keys():
-            with open(r'//aka/work/hara.e/AMED/lib/dataset/annotations/' + typ + '.json') as f:
-                json.dump(d[typ], f)
+        with open(r'//aka/work/hara.e/AMED/lib/dataset/annotations/annotations.json', 'w') as f:
+            json.dump(self.info, f)
 
     @staticmethod
     def _convert_diagnosis(diagnosis: str):
