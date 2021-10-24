@@ -4,13 +4,11 @@ import cv2
 import random
 import imagehash
 import json
-import re
 from imagehash import phash
 from pydicom import dcmread
 from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
-from sklearn.model_selection import train_test_split
 
 from lib.config import config
 
@@ -24,6 +22,7 @@ class Reshaper:
         self.annotations_path.mkdir(exist_ok=True)
         self.id = 0
         self.hashes = []
+        self.name = ['単純嚢胞', ' 肝細胞癌', '血管腫', '転移性肝癌']
         self.info = {
             'info': {
                 'description': 'AMED Dataset',
@@ -81,11 +80,9 @@ class Reshaper:
                 image = Image.fromarray(ds.pixel_array)
                 info = pd.read_csv(str(path / path.stem) + '.csv', header=None, encoding='shift-jis').values[0].tolist()
                 width, height = image.size
-                if height > 400 and width > 400:
+                if height > 400 and width > 400 and info[13] in self.name:
                     _hash = phash(image)
                     if not self._in_same_image(_hash):
-                        _id = self.id
-                        self.id += 1
                         annotations = (p.parents[1] / 'CUTIMAGE').glob('*.csv')
                         for annotation in annotations:
                             if str(p.stem) in str(annotation):
@@ -94,32 +91,36 @@ class Reshaper:
 
                                 self.info['images'].append({
                                     'licenses': 1,
-                                    'file_name': str(_id).zfill(6) + '.jpg',
+                                    'file_name': str(self.id).zfill(6) + '.jpg',
                                     'height': height,
                                     'width': width,
-                                    'id': _id
+                                    'id': self.id
                                 })
                                 self.info['annotations'].append({
                                     'iscrowd': 0,
-                                    'image_id': _id,
+                                    'image_id': self.id,
                                     'bbox': points,
                                     'category_id': self._convert_diagnosis(info[13]),
-                                    'id': _id,
-                                    'age': int(re.sub(r"\D", "", ds.PatientAge)),
+                                    'id': self.id,
+                                    'age': info[8],
                                     'sex': 1 if ds.PatientSex == 'M' else 0
                                 })
 
-                        self.hashes.append(_hash)
-
-                        image = self._remove_noises(image)
-                        image.save(self.images_path / (str(_id).zfill(6) + '.jpg'))
+                                self.hashes.append(_hash)
+                                image = self._remove_noises(image)
+                                image.save(self.images_path / (str(self.id).zfill(6) + '.jpg'))
+                                self.id += 1
+                                if self.id % 5000 == 0:
+                                    with open(f'./annotations{self.id}.json', 'w') as f:
+                                        print(self.id)
+                                        json.dump(self.info, f)
             except:
                 pass
 
     def _in_same_image(self, _hash: imagehash.ImageHash) -> bool:
         return sum(1 for it in self.hashes if it - _hash < 2) != 0
 
-    def _remove_noises(self, image: Image.Image, kernel_size: int = 3, random_range: tuple = (-3, 3)) -> Image.Image:
+    def _remove_noises(self, image: Image.Image, kernel_size: int=3, random_range: tuple=(-3, 3)) -> Image.Image:
         img = np.asarray(image, dtype=np.uint8)
 
         try:
@@ -157,14 +158,12 @@ class Reshaper:
         return [array[0] - half, array[1] - half, half * 2, half * 2]
 
     def _create_json(self):
-        with open(r'//aka/work/hara.e/AMED/lib/dataset/annotations/annotations.json', 'w') as f:
+        with open(self.root / 'annotations/annotations.json', 'w') as f:
             json.dump(self.info, f)
 
-    @staticmethod
-    def _convert_diagnosis(diagnosis: str):
-        name = ['単純嚢胞', ' 肝細胞癌', '血管腫', '転移性癌']
-        if diagnosis in name:
-            diagnosis = name.index(diagnosis) + 1
+    def _convert_diagnosis(self, diagnosis: str):
+        if diagnosis in self.name:
+            diagnosis = self.name.index(diagnosis) + 1
         else:
             diagnosis = 5
         return diagnosis
