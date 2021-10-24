@@ -22,7 +22,7 @@ class Reshaper:
         self.annotations_path.mkdir(exist_ok=True)
         self.id = 0
         self.hashes = []
-        self.name = ['単純嚢胞', ' 肝細胞癌', '血管腫', '転移性肝癌']
+        self.name = ['単純嚢胞', '肝細胞癌', '血管腫', '転移性肝癌']
         self.info = {
             'info': {
                 'description': 'AMED Dataset',
@@ -158,7 +158,7 @@ class Reshaper:
         return [array[0] - half, array[1] - half, half * 2, half * 2]
 
     def _create_json(self):
-        with open(self.root / 'annotations/annotations.json', 'w') as f:
+        with open(self.annotations_path / 'annotations.json', 'w') as f:
             json.dump(self.info, f)
 
     def _convert_diagnosis(self, diagnosis: str):
