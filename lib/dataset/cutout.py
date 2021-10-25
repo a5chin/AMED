@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 class CutOuter:
     def __init__(self, root: str=r'\\aka\work\hara.e\AMED\lib\dataset'):
         self.root = Path(root)
-        json_path = self.root / r'annotations/temp.json'
+        json_path = self.root / r'annotations/annotations.json'
         with open(json_path) as f:
             self.data = load(f)
 
@@ -25,7 +25,7 @@ class CutOuter:
             dump(self.data, f)
 
     def train_test_split(self):
-        typ = ('validation', 'test')
+        typ = ('train', 'validation')
         info, licenses, categories = self.data['info'], self.data['licenses'], self.data['categories']
         data = {
             t: {'info': info, 'licenses': licenses, 'images': {}, 'annotations': {}, 'categories': categories}
@@ -34,7 +34,7 @@ class CutOuter:
         images = [image for image in self.data['images']]
         annotations = [annotations for annotations in self.data['annotations']]
         images_train, images_test, annotations_train, annotations_test \
-            = train_test_split(images, annotations, test_size=0.5)
+            = train_test_split(images, annotations, test_size=0.3)
         data[typ[0]]['images'], data[typ[0]]['annotations'] \
             = sorted(images_train, key=lambda x: x['id']), sorted(annotations_train, key=lambda x: x['id'])
         data[typ[1]]['images'], data[typ[1]]['annotations'] \
