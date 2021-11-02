@@ -97,6 +97,7 @@ class Reshaper:
                                     'id': self.id
                                 })
                                 self.info['annotations'].append({
+                                    'area': width * height,
                                     'iscrowd': 0,
                                     'image_id': self.id,
                                     'bbox': points,
