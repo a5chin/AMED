@@ -9,4 +9,5 @@ pydicom
 seaborn
 sklearn
 tqdm
+tensorboard
 yacs
