@@ -13,10 +13,10 @@ assignees: ''
 #xxxx
 
 
-# タスク
+# Task
 - [ ] xxxx
 
 # Finished condition
 - [ ] Tasks completed
 
-# Supplementary condition
+# Supplementary condition (optional)
