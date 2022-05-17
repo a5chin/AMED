@@ -22,8 +22,10 @@ def make_parser():
 
     return parser.parse_args()
 
+
 def main():
     args = make_parser()
+
     reshaper = Reshaper()
     reshaper.organize(args.save_path)
 
