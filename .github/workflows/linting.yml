@@ -20,7 +20,7 @@ jobs:
     - name: Install formatter
       run: |
         python -m pip install --upgrade pip
-        pip install black flake8 isort pydocstyle toml
+        pip install black flake8 isort==5.10.1 pydocstyle toml
     
     - name: Test with black
       run: |
@@ -28,7 +28,6 @@ jobs:
 
     - name: Test with isort
       run: |
-        pwd
         isort --check amed/ examples/
     
     - name: Test with flake8
