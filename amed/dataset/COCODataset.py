@@ -16,9 +16,10 @@ from collections import OrderedDict, defaultdict
 
 import cv2
 import numpy as np
-from config import config
 from pycocotools.cocoeval import COCOeval
 from torch.utils.data import Dataset
+
+from config import config
 
 logger = logging.getLogger(__name__)
 

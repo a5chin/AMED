@@ -14,11 +14,12 @@ import cv2
 import imagehash
 import numpy as np
 import pandas as pd
-from config import config
 from imagehash import phash
 from PIL import Image
 from pydicom import dcmread
 from tqdm import tqdm
+
+from config import config
 
 
 class Reshaper:

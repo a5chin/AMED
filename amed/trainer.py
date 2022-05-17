@@ -1,9 +1,10 @@
 import torch
-from config import config
 from torch import optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
+
+from config import config
 
 from .dataset import AMEDDataset
 from .models import YOLOX, YOLOv5

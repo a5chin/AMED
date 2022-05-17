@@ -8,6 +8,7 @@ warnings.filterwarnings("ignore")
 
 import cv2
 import torch
+
 from config import config
 
 from .COCODataset import COCODataset
