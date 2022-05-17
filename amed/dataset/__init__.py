@@ -1,3 +1,3 @@
-from lib.dataset.reshaper import Reshaper
-from lib.dataset.AMEDDataset import AMEDDataset
-from lib.dataset.cutout import CutOuter
+from .AMEDDataset import AMEDDataset
+from .cutout import CutOuter
+from .reshaper import Reshaper

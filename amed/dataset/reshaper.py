@@ -54,11 +54,11 @@ class Reshaper:
             ],
         }
 
-    def organize(self):
+    def organize(self, save_path: str):
         for p in tqdm(self.path):
             self._read_data(p)
 
-        self._create_json()
+        self._create_json(save_path)
 
     def _read_data(self, path: Path):
         for p in (path / "DICOM").glob("*.dcm"):
@@ -102,10 +102,6 @@ class Reshaper:
                                 image = self._remove_noises(image)
                                 image.save(self.images_path / (str(self.id).zfill(6) + ".jpg"))
                                 self.id += 1
-                                if self.id % 5000 == 0:
-                                    with open(f"./annotations{self.id}.json", "w") as f:
-                                        print(self.id)
-                                        json.dump(self.info, f)
             except:
                 pass
 
@@ -149,8 +145,8 @@ class Reshaper:
         half = array[2] / 2
         return [array[0] - half, array[1] - half, half * 2, half * 2]
 
-    def _create_json(self):
-        with open(self.annotations_path / "annotations.json", "w") as f:
+    def _create_json(self, save_path: str):
+        with open(save_path, "w") as f:
             json.dump(self.info, f)
 
     def _convert_diagnosis(self, diagnosis: str):
