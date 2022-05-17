@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -28,6 +28,7 @@ jobs:
 
     - name: Test with isort
       run: |
+        pwd
         isort --check amed/ examples/
     
     - name: Test with flake8
