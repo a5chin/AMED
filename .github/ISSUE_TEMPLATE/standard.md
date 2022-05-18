@@ -8,10 +8,8 @@ assignees: ''
 
 # Objective
 
-
 # Related issues
 #xxxx
-
 
 # Task
 - [ ] xxxx
