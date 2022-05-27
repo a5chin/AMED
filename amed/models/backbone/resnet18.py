@@ -2,10 +2,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import torch
 import torch.nn as nn
-from einops import rearrange, repeat
-from einops.layers.torch import Rearrange
-from torch import Tensor, einsum
-from torchvision.models.resnet import load_state_dict_from_url
+from torch import Tensor
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-f37072fd.pth",

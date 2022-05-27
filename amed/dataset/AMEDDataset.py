@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Tuple
 
 import cv2
 import torch
@@ -37,18 +37,11 @@ class AMEDDataset(COCODataset):
 
 
 def get_dataset(root, train_transform, valid_transform) -> Tuple[Dataset, Dataset]:
-    traindataset = AMEDDataset(
-        root=root,
-        typ="train",
-        transform=train_transform
-    )
-    valdataset = AMEDDataset(
-        root=root,
-        typ="validation",
-        transform=valid_transform
-    )
+    traindataset = AMEDDataset(root=root, typ="train", transform=train_transform)
+    valdataset = AMEDDataset(root=root, typ="validation", transform=valid_transform)
 
     return traindataset, valdataset
+
 
 def get_loader(train_dataset, valid_dataset, batch_size) -> Tuple[DataLoader, DataLoader]:
     train_loader = DataLoader(

@@ -87,20 +87,8 @@ class SimSiam(nn.Module):
         Examples:
             >>> p0, p1, z0, z1 = model(x1=images[0], x2=images[1])
         """
-        # f0 = self.backbone(x0).flatten(start_dim=1)
-        f0 = self.backbone(x0)
-        for i, (cls_conv, key) in enumerate(zip(self.cls_convs, f0.keys())):
-            cls_x = self.stems[i](f0[key])
-            f0[key] = cls_conv(cls_x).flatten(start_dim=1)
-        f0 = torch.cat([v for v in f0.values()], dim=1)
-        print(f0.shape)
-
-        # f1 = self.backbone(x1).flatten(start_dim=1)
-        f1 = self.backbone(x1)
-        for i, (cls_conv, key) in enumerate(zip(self.cls_convs, f1.keys())):
-            cls_x = self.stems[i](f1[key])
-            f1[key] = cls_conv(cls_x).flatten(start_dim=1)
-        f1 = torch.cat([v for v in f1.values()], dim=1)
+        f0 = self.backbone(x0).flatten(start_dim=1)
+        f1 = self.backbone(x1).flatten(start_dim=1)
 
         z0 = self.encoder(f0)
         z1 = self.encoder(f1)
