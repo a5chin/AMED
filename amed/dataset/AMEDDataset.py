@@ -2,7 +2,7 @@ from typing import Dict, Tuple
 
 import cv2
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from config import config
 
