@@ -1,13 +1,8 @@
-import pathlib
-import sys
-import warnings
-
-current_dir = pathlib.Path(__file__).resolve().parent
-sys.path.append(str(current_dir) + "/../")
-warnings.filterwarnings("ignore")
+from typing import Tuple
 
 import cv2
 import torch
+from torch.utils.data import DataLoader, Dataset
 
 from config import config
 
@@ -38,4 +33,28 @@ class AMEDDataset(COCODataset):
         else:
             bbox = torch.tensor(bbox)
 
-        return img, bbox
+        return img, category
+
+
+def get_dataset(root, train_transform, valid_transform) -> Tuple[Dataset, Dataset]:
+    traindataset = AMEDDataset(root=root, typ="train", transform=train_transform)
+    valdataset = AMEDDataset(root=root, typ="validation", transform=valid_transform)
+
+    return traindataset, valdataset
+
+
+def get_loader(train_dataset, valid_dataset, batch_size) -> Tuple[DataLoader, DataLoader]:
+    train_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=True,
+    )
+    valid_loader = DataLoader(
+        dataset=valid_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        drop_last=False,
+    )
+
+    return train_loader, valid_loader
