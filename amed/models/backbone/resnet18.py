@@ -1,8 +1,10 @@
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, List, Optional, Type, Union
 
 import torch
 import torch.nn as nn
-from torch import Tensor
+from torchvision.models.resnet import load_state_dict_from_url
+
+from .utils.hub import load_state_dict_from_url
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
@@ -51,7 +53,7 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x
 
         out = self.conv1(x)
@@ -105,7 +107,7 @@ class Bottleneck(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x
 
         out = self.conv1(x)
@@ -220,7 +222,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _forward_impl(self, x: Tensor) -> Tensor:
+    def _forward_impl(self, x: torch.Tensor) -> torch.Tensor:
         # See note [TorchScript super()]
         x = self.conv1(x)
         x = self.bn1(x)
@@ -238,32 +240,19 @@ class ResNet(nn.Module):
 
         return x
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self._forward_impl(x)
 
 
-def _ovewrite_named_param(kwargs: Dict[str, Any], param: str, new_value) -> None:
-    if param in kwargs:
-        if kwargs[param] != new_value:
-            raise ValueError(f"The parameter '{param}' expected value {new_value} but got {kwargs[param]} instead.")
-    else:
-        kwargs[param] = new_value
-
-
 def _resnet(
-    block: Type[Union[BasicBlock, Bottleneck]],
-    layers: List[int],
-    weights,
-    progress: bool,
-    **kwargs: Any,
+    arch: str, block: Type[Union[BasicBlock, Bottleneck]], layers: List[int], pretrained: bool, progress: bool, **kwargs: Any
 ) -> ResNet:
-    if weights is not None:
-        _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
-
     model = ResNet(block, layers, **kwargs)
-
-    if weights is not None:
-        model.load_state_dict(weights.get_state_dict(progress=progress))
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+        model.load_state_dict(state_dict)
+    for param in model.parameters():
+        param.requires_grad = True
 
     return model
 
