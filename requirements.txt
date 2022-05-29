@@ -3,11 +3,14 @@ ipywidgets
 jupyterlab
 nodejs
 notebook
+opencv-python
 pandas
 pillow
 pydicom
 seaborn
 sklearn
+torch
+torchvision
 tqdm
 tensorboard
 yacs
