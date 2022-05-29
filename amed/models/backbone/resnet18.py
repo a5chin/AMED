@@ -245,7 +245,13 @@ class ResNet(nn.Module):
 
 
 def _resnet(
-    arch: str, block: Type[Union[BasicBlock, Bottleneck]], layers: List[int], num_classes, pretrained: bool, progress: bool, **kwargs: Any
+    arch: str,
+    block: Type[Union[BasicBlock, Bottleneck]],
+    layers: List[int],
+    num_classes,
+    pretrained: bool,
+    progress: bool,
+    **kwargs: Any
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
     if pretrained:

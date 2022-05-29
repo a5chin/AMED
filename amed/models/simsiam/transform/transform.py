@@ -2,8 +2,7 @@ import random
 from typing import List
 
 import torch
-import numpy as np
-from PIL import Image, ImageFilter
+from PIL import ImageFilter
 from torchvision import transforms
 
 
@@ -25,10 +24,6 @@ class GaussianBlur:
 
     def __call__(self, x):
         sigma = random.uniform(self.sigma[0], self.sigma[1])
-        ksize = int(2*((sigma-0.8)/0.3+1)+1)
-        if ksize % 2.0 == 0:
-            ksize = ksize + 1
-
         x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
         return x
 

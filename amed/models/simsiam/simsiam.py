@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-from ..backbone.network_blocks import BaseConv
 from .modules import Encoder, Predictor
 
 

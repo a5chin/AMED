@@ -1,16 +1,16 @@
 import sys
 from pathlib import Path
 
-import numpy as np
 import torch
 from torch import nn
 
 current_dir = Path(__file__).resolve().parent
 sys.path.append(str(current_dir) + "/../")
 
-from amed.models import SimSiam
-from amed .models.simsiam import get_transforms
 from test_resnet import test_resnet
+
+from amed.models import SimSiam
+from amed.models.simsiam import get_transforms
 
 
 def test_transforms():
@@ -18,6 +18,7 @@ def test_transforms():
     imgs = torch.randn(3, 64, 64)
     two_imgs = transforms(imgs)
     assert two_imgs[0].shape == two_imgs[1].shape
+
 
 def test_simsiam():
     imgs = torch.randn(4, 3, 64, 64)
@@ -27,5 +28,5 @@ def test_simsiam():
     backbone.fc = nn.Identity()
     simsiam = SimSiam(backbone=backbone, dim=feat_dim)
 
-    out0, out1 = simsiam(imgs[: 2], imgs[2: ])
+    out0, out1 = simsiam(imgs[:2], imgs[2:])
     assert (out0[0].shape == out0[1].shape) and (out1[0].shape == out1[1].shape)
