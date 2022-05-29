@@ -9,6 +9,7 @@ pillow
 pydicom
 seaborn
 sklearn
+torch
 tqdm
 tensorboard
 yacs
