@@ -245,7 +245,7 @@ class ResNet(nn.Module):
 
 
 def _resnet(
-    arch: str, block: Type[Union[BasicBlock, Bottleneck]], layers: List[int], pretrained: bool, progress: bool, **kwargs: Any
+    arch: str, block: Type[Union[BasicBlock, Bottleneck]], layers: List[int], num_classes, pretrained: bool, progress: bool, **kwargs: Any
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
     if pretrained:
@@ -254,14 +254,16 @@ def _resnet(
     for param in model.parameters():
         param.requires_grad = True
 
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+
     return model
 
 
-def resnet18(pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
+def resnet18(num_classes: int = 4, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet("resnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
+    return _resnet("resnet18", BasicBlock, [2, 2, 2, 2], num_classes, pretrained, progress, **kwargs)
