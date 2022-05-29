@@ -2,7 +2,7 @@ import random
 from typing import List
 
 import torch
-from PIL import Image, ImageFilter
+from PIL import ImageFilter
 from torchvision import transforms
 
 
@@ -28,17 +28,13 @@ class GaussianBlur:
         return x
 
 
-class Numpy2PIL:
-    def __call__(self, x):
-        return Image.fromarray(x)
-
-
-def get_transforms():
+def get_transforms(mode: str):
     base_transform = {
         "train": transforms.Compose(
             [
-                Numpy2PIL(),
+                transforms.ToPILImage(),
                 transforms.RandomResizedCrop(size=(512, 512), scale=(0.2, 1.0)),
+                transforms.RandomGrayscale(p=0.2),
                 transforms.RandomApply([GaussianBlur([0.1, 2.0])], p=0.5),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -46,12 +42,13 @@ def get_transforms():
         ),
         "valid": transforms.Compose(
             [
-                Numpy2PIL(),
+                transforms.ToPILImage(),
                 transforms.RandomResizedCrop(size=(512, 512), scale=(0.2, 1.0)),
+                transforms.RandomGrayscale(p=0.2),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         ),
     }
 
-    return TwoCropsTransform(base_transform["train"]), TwoCropsTransform(base_transform["valid"])
+    return TwoCropsTransform(base_transform[mode])
