@@ -42,7 +42,7 @@ class Trainer:
 
         for images, _ in self.valid_loader:
             x0, x1 = images[0].to(self.cfg.device), images[1].to(self.cfg.device)
-            out0, out1 = model(x0 = x0, x1 = x1)
+            out0, out1 = model(x0=x0, x1=x1)
 
             loss = (self.criterion(*out0).mean() + self.criterion(*out1).mean()) / 2
             losses.update(loss.item())

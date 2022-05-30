@@ -1,5 +1,6 @@
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self, name: str, fmt: str = ":f") -> None:
         self.name = name
         self.fmt = fmt

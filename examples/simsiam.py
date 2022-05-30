@@ -11,11 +11,12 @@ current_dir = pathlib.Path(__file__).resolve().parent
 sys.path.append(str(current_dir) + "/../")
 warnings.filterwarnings("ignore")
 
+from amed import Trainer
 from amed.dataset import get_dataset, get_loader
 from amed.models import SimSiam
 from amed.models.backbone import resnet18
 from amed.models.simsiam import get_transforms
-from amed import Trainer
+from amed.models.simsiam.loss import NegativeCosineSimilarity
 
 
 def make_parser():
@@ -30,7 +31,7 @@ def make_parser():
     parser.add_argument("-w", "--weight-decay", default=1e-4, type=float, help="weight decay (default: 1e-4)")
 
     parser.add_argument("--lr", default=5e-3, type=float, help="initial (base) learning rate")
-    parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")    
+    parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")
     parser.add_argument("--fix-pred-lr", action="store_true", help="fix learning rate for the predictor")
 
     return parser.parse_args()
@@ -54,8 +55,8 @@ def main():
 
     if args.fix_pred_lr:
         optim_params = [
-            {"params": simsiam.module.encoder.parameters(), "fix_lr": False},
-            {"params": simsiam.module.predictor.parameters(), "fix_lr": True},
+            {"params": simsiam.encoder.parameters(), "fix_lr": False},
+            {"params": simsiam.predictor.parameters(), "fix_lr": True},
         ]
     else:
         optim_params = simsiam.parameters()
@@ -67,7 +68,7 @@ def main():
     )
 
     init_lr = args.lr * args.batch_size / 256
-    criterion = nn.CosineSimilarity(dim=1).to(device=args.device)
+    criterion = NegativeCosineSimilarity(dim=1)
     optimizer = optim.SGD(optim_params, init_lr, momentum=args.momentum, weight_decay=args.weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs / 4, eta_min=5e-5)
 
@@ -77,7 +78,7 @@ def main():
         valid_loader=valid_loader,
         criterion=criterion,
         optimizer=optimizer,
-        scheduler=scheduler
+        scheduler=scheduler,
     )
 
     trainer.fit(model=simsiam)
