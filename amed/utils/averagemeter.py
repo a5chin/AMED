@@ -6,17 +6,17 @@ class AverageMeter(object):
         self.reset()
 
     def reset(self) -> None:
-        self.val = 0
+        self.value = 0
         self.avg = 0
         self.sum = 0
         self.count = 0
 
-    def update(self, val: float, n: int = 1) -> None:
-        self.val = val
-        self.sum += val * n
+    def update(self, value: float, n: int = 1) -> None:
+        self.value = value
+        self.sum += value * n
         self.count += n
         self.avg = self.sum / self.count
 
     def __str__(self):
-        fmtstr = "{name} {val" + self.fmt + "} ({avg" + self.fmt + "})"
+        fmtstr = "{name} {value" + self.fmt + "} ({avg" + self.fmt + "})"
         return fmtstr.format(**self.__dict__)

@@ -22,7 +22,6 @@ def make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch-size", default=64, type=int, help="plese set batch-size")
     parser.add_argument("-e", "--epochs", default=300, type=int, help="number of total epochs to run")
-    parser.add_argument("-l", "--learning-rate", default=0.05, type=float, help="initial (base) learning rate", dest="lr")
     parser.add_argument("-m", "--momentum", default=0.9, type=float, help="momentum of SGD solver")
     parser.add_argument(
         "-r", "--root", default="/work/hara.e/AMED/lib/dataset/cutout/images", type=str, help="please set data root"
@@ -30,6 +29,8 @@ def make_parser():
     parser.add_argument("-s", "--seed", default=1, type=int, help="seed for initializing training")
     parser.add_argument("-w", "--weight-decay", default=1e-4, type=float, help="weight decay (default: 1e-4)")
 
+    parser.add_argument("--lr", default=5e-3, type=float, help="initial (base) learning rate")
+    parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")    
     parser.add_argument("--fix-pred-lr", action="store_true", help="fix learning rate for the predictor")
 
     return parser.parse_args()
