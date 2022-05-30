@@ -14,7 +14,7 @@ def get_logger(filename: Optional[str] = None) -> logging.Logger:
     handler = logging.StreamHandler()
     handler.setFormatter(fmt)
     logger.addHandler(handler)
-    
+
     if filename is not None:
         handler = logging.FileHandler(filename=filename)
         handler.setFormatter(fmt)

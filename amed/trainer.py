@@ -1,5 +1,5 @@
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 import torch
 from torch import nn
@@ -19,7 +19,7 @@ class Trainer:
         self.train_loader, self.valid_loader = train_loader, valid_loader
         self.criterion, self.optimizer, self.scheduler = criterion, optimizer, scheduler
 
-        self.best_loss = float("inf")        
+        self.best_loss = float("inf")
 
     def fit(self, model: nn.Module):
         for epoch in range(self.cfg.epochs):
