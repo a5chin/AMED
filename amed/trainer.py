@@ -37,7 +37,7 @@ class Trainer:
                     losses.update(loss.item())
                     pbar.set_postfix(loss=losses.value)
 
-                self.train_writer.add_scalar("loss", losses.avg, epoch)
+                self.train_writer.add_scalar("loss", losses.avg, epoch + 1)
 
             self.evaluate(model, epoch)
 
@@ -56,7 +56,7 @@ class Trainer:
         self.logger.info(f"loss: {losses.avg}")
 
         if epoch is not None:
-            self.valid_writer.add_scalar("loss", losses.avg, epoch)
+            self.valid_writer.add_scalar("loss", losses.avg, epoch + 1)
 
             if losses.avg <= self.best_loss:
                 self.best_acc = losses.avg
