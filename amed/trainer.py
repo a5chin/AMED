@@ -6,12 +6,13 @@ from torch import nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from amed.utils import AverageMeter
+from amed.utils import AverageMeter, get_logger
 
 
 class Trainer:
     def __init__(self, cfg, train_loader, valid_loader, criterion, optimizer, scheduler):
         self.cfg = cfg
+        self.logger = get_logger()
         self.train_writer = SummaryWriter(Path(self.cfg.logdir) / "train")
         self.valid_writer = SummaryWriter(Path(self.cfg.logdir) / "valid")
 
@@ -36,24 +37,27 @@ class Trainer:
                     losses.update(loss.item())
                     pbar.set_postfix(loss=losses.value)
 
-                self.train_writer.add_scalar(losses.avg, epoch)
+                self.train_writer.add_scalar("loss", losses.avg, epoch)
 
             self.evaluate(model, epoch)
 
+    @torch.no_grad()
     def evaluate(self, model: nn.Module, epoch: Optional[int] = None) -> None:
         model.eval()
         losses = AverageMeter("valid_loss")
 
-        for images, _ in self.valid_loader:
+        for images, _ in tqdm(self.valid_loader):
             x0, x1 = images[0].to(self.cfg.device), images[1].to(self.cfg.device)
             out0, out1 = model(x0=x0, x1=x1)
 
             loss = (self.criterion(*out0).mean() + self.criterion(*out1).mean()) / 2
             losses.update(loss.item())
 
+        self.logger.info(f"loss: {losses.avg}")
+
         if epoch is not None:
-            self.valid_writer.add_scalar(losses.avg, epoch)
+            self.valid_writer.add_scalar("loss", losses.avg, epoch)
 
             if losses.avg <= self.best_loss:
                 self.best_acc = losses.avg
-                torch.save(model.state_dict(), Path(self.cfg.logdir) / "best.pth")
+                torch.save(model.backbone.state_dict(), Path(self.cfg.logdir) / "best.pth")
