@@ -6,6 +6,7 @@ notebook
 opencv-python
 pandas
 pillow
+protobuf~=3.20.1
 pydicom
 seaborn
 sklearn
