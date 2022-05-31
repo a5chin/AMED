@@ -167,3 +167,6 @@ logs/
 *.log
 *.out
 *.synctex.gz
+
+# ignore Power Point files
+*.pptx
