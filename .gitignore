@@ -161,3 +161,9 @@ cython_debug/
 
 # logs dir
 logs/
+
+# ignore TeX files
+*.aux
+*.log
+*.out
+*.synctex.gz
