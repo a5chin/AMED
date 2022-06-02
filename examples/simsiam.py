@@ -30,7 +30,7 @@ def make_parser():
     parser.add_argument("-s", "--seed", default=1, type=int, help="seed for initializing training")
     parser.add_argument("-w", "--weight-decay", default=1e-4, type=float, help="weight decay (default: 1e-4)")
 
-    parser.add_argument("--lr", default=5e-3, type=float, help="initial (base) learning rate")
+    parser.add_argument("--lr", default=1e-4, type=float, help="initial (base) learning rate")
     parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")
     parser.add_argument("--fix-pred-lr", action="store_true", help="fix learning rate for the predictor")
 
@@ -70,7 +70,7 @@ def main():
     init_lr = args.lr * args.batch_size / 256
     criterion = NegativeCosineSimilarity(dim=1)
     optimizer = optim.SGD(optim_params, init_lr, momentum=args.momentum, weight_decay=args.weight_decay)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs / 4, eta_min=5e-5)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs / 4, eta_min=1e-6)
 
     trainer = Trainer(
         cfg=args,
