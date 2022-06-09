@@ -1,7 +1,6 @@
 import argparse
 import json
 import pathlib
-import random
 import sys
 import warnings
 from typing import Dict
@@ -13,24 +12,32 @@ current_dir = pathlib.Path(__file__).resolve().parent
 sys.path.append(str(current_dir) + "/../")
 warnings.filterwarnings("ignore")
 
-from amed.utils import Metric, calc_iou
+from amed.utils import Metric, calc_iou, get_logger
 
 
 def make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--label_file", default="../test.json", type=str, help="please set label file"
+        "--label_file",
+        default=r"//aka/work/hara.e/AMED/lib/dataset/annotations/test.json",
+        type=str,
+        help="please set label file",
     )
     parser.add_argument(
-        "--pred_file", default="../metric0.05.json", type=str, help="please set prediction file"
+        "--pred_file",
+        default=r"//aka/work/hara.e/AMED/weights/CenterNet/four/metric0.3.json",
+        type=str,
+        help="please set prediction file",
     )
 
     return parser.parse_args()
+
 
 def load_json(file_name: str) -> Dict:
     with open(file_name, "r") as f:
         dct = json.load(f)
     return dct
+
 
 def create_df_label(dct: Dict) -> pd.DataFrame:
     df = {key: [] for key in dct[0].keys()}
@@ -41,6 +48,7 @@ def create_df_label(dct: Dict) -> pd.DataFrame:
 
     return pd.DataFrame(df)
 
+
 def create_df_pred(dct: Dict) -> pd.DataFrame:
     df = {key: [] for key in dct.keys()}
 
@@ -50,6 +58,7 @@ def create_df_pred(dct: Dict) -> pd.DataFrame:
 
     return pd.DataFrame(df)
 
+
 def create_df_iou(preds: pd.DataFrame, labels: pd.DataFrame) -> pd.DataFrame:
     df_ious = {"ious": []}
 
@@ -58,6 +67,7 @@ def create_df_iou(preds: pd.DataFrame, labels: pd.DataFrame) -> pd.DataFrame:
         df_ious["ious"].append(iou)
 
     return pd.DataFrame(df_ious)
+
 
 def preprocess(args) -> pd.DataFrame:
     labels = load_json(args.label_file)["annotations"]
@@ -72,8 +82,11 @@ def preprocess(args) -> pd.DataFrame:
 
     return df_preds
 
+
 def main():
     args = make_parser()
+    logger = get_logger()
+
     metric = Metric(conf_th=0.3)
     cmat = np.zeros((5, 5))
 
@@ -82,7 +95,9 @@ def main():
         row = df.iloc[idx, :]
         cmat += metric.update(row)
 
-    print(cmat)
+    precision, recall, f1 = metric.evaluate(cmat)
+    logger.info(f"precision: {precision}, recall: {recall}, f1: {f1}")
+
 
 if __name__ == "__main__":
     main()
