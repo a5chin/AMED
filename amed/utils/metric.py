@@ -1,4 +1,8 @@
+from typing import List
+
 import numpy as np
+import torch
+from torchvision.ops.boxes import box_iou
 
 
 class Metric:
@@ -9,13 +13,13 @@ class Metric:
     def reset(self) -> None:
         self.cmat = np.zeros((5, 5)).astype(np.int16)
 
-    def update(self, row):
+    def update(self, row) -> None:
         self.reset()
 
-        label = row["label"]
+        label = row["category_id"]
         preds = np.array(row["preds"])
         reliabilities = np.array(row["reliability"])
-        ious = np.array(row["iou"])
+        ious = np.array(row["ious"])
 
         if 0 in row["preds"]:
             self.cmat[label, 0] += 1
@@ -23,7 +27,7 @@ class Metric:
             pred = preds[reliabilities.argmax()]
             self.cmat[label, pred] += 1
         else:
-            for pred, iou in zip(row["preds"], row["iou"]):
+            for pred, iou in zip(row["preds"], row["ious"]):
                 if iou >= self.iou_th:
                     self.cmat[label, pred] += 1
                 else:
@@ -36,3 +40,17 @@ class Metric:
 
             while diagnosis.sum() >= 2:
                 self.cmat[i, 0] -= 1
+
+        return self.cmat
+
+
+def calc_iou(pred: List, label: List) -> List:
+    x, y, w, h = label
+
+    if pred != [[]]:
+        pred, label = torch.Tensor(pred), torch.Tensor([[x, y, x + w, y + h]])
+        iou = box_iou(pred, label)
+    else:
+        iou = torch.Tensor([[0.]])
+
+    return iou.flatten().tolist()
