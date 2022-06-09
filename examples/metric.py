@@ -88,7 +88,7 @@ def main():
     logger = get_logger()
 
     metric = Metric(conf_th=0.3)
-    cmat = np.zeros((5, 5))
+    cmat = np.zeros((5, 5)).astype(np.uint16)
 
     df = preprocess(args)
     for idx in range(len(df)):

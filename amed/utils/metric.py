@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 import numpy as np
+import pandas as pd
 import torch
 from torchvision.ops.boxes import box_iou
 
@@ -13,7 +14,7 @@ class Metric:
     def reset(self) -> None:
         self.cmat = np.zeros((5, 5)).astype(np.int16)
 
-    def update(self, row) -> None:
+    def update(self, row: pd.DataFrame) -> np.ndarray:
         self.reset()
 
         label = row["category_id"]
