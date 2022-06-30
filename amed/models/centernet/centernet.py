@@ -3,58 +3,24 @@ from typing import Dict
 import torch
 from torch import nn
 
-
-class CenterNetHead(nn.Module):
-    def __init__(self, num_classes: int, down_ratio: int = 1, embedding_dim: int = 128):
-        super().__init__()
-        self.down_ratio = down_ratio
-        self.down_sampler = nn.Conv2d(
-            embedding_dim,
-            embedding_dim,
-            kernel_size=(3, 3),
-            padding=1,
-            stride=down_ratio,
-            bias=True,
-        )
-
-        self.head_heatmap = nn.Conv2d(embedding_dim, num_classes, kernel_size=(3, 3), padding=1, bias=True)
-        self.head_heatmap.bias.data.fill_(-4.0)
-        self.head_width_height = nn.Conv2d(embedding_dim, 2, kernel_size=(3, 3), padding=1, bias=True)
-        self.head_offset_regularizer = nn.Conv2d(embedding_dim, 2, kernel_size=(3, 3), padding=1, bias=True)
-
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
-        features = torch.relu_(self.down_sampler(torch.relu_(x)))
-
-        value = {
-            "hm": self.head_heatmap(features).sigmoid_(),
-            "wh": self.head_width_height(features),
-            "offset": self.head_offset_regularizer(features),
-        }
-
-        return value
+from .backbone import resnet18
+from .modules import CenterNetHead, CTResNetNeck
 
 
 class CenterNet(nn.Module):
-    def __init__(
-        self,
-        num_classes: int,
-        backbone: nn.Module,
-        head: nn.Module,
-        decoder,
-        down_ratio: int,
-        embedding_dim: int,
-    ):
+    def __init__(self) -> None:
         super().__init__()
-        self.num_classes = num_classes
-        self.embedding_dim = embedding_dim
-        self.scaling_factor = down_ratio
-
-        self.backbone = backbone
-        self.head = head
-        self.decoder = decoder
+        self.backbone = resnet18(pretrained=True)
+        self.neck = CTResNetNeck(
+            in_channels=512,
+            num_deconv_filters=(256, 128, 64),
+            num_deconv_kernels=(4, 4, 4),
+        )
+        self.bbox_head = CenterNetHead(in_channels=64, feat_channels=64, num_classes=4)
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
-        output = self.backbone(x)
-        value = self.head(output)
+        x = self.backbone(x)
+        x = self.neck(x)
+        feature = self.bbox_head(x)
 
-        return value
+        return feature

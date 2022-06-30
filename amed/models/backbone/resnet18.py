@@ -2,7 +2,6 @@ from typing import Any, Callable, List, Optional, Type, Union
 
 import torch
 import torch.nn as nn
-from torchvision.models.resnet import load_state_dict_from_url
 
 from .utils.hub import load_state_dict_from_url
 
