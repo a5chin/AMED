@@ -21,5 +21,4 @@ def test_model():
     loss = model.loss(feature, gt_bboxes, gt_labels, imgs_shape)
 
     assert loss["loss_center_heatmap"].shape == (16, 4, 128, 128)
-    assert loss["loss_wh"].shape == (16, 2, 128, 128)
-    assert loss["loss_offset"].shape == (16, 2, 128, 128)
+    assert loss["loss_wh"].shape == loss["loss_offset"].shape == (16, 2, 128, 128)
