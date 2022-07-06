@@ -38,17 +38,17 @@ class CenterNet(nn.Module):
     ) -> Dict[str, torch.Tensor]:
         target = self.get_targets(gt_bboxes, gt_labels, feature["heatmap"].shape, imgs_shape)
 
-        loss_center_heatmap = self.loss_center_haetmap(feature["heatmap"], target["center_heatmap_target"])
-        loss_wh = self.loss_wh(feature["wh"], target["wh_target"])
+        loss_center_heatmap = self.loss_center_haetmap(feature["heatmap"], target["center_heatmap_target"]).sum(dim=(3, 2, 1))
+        loss_wh = self.loss_wh(feature["wh"], target["wh_target"]).sum(dim=(3, 2, 1))
         loss_offset = self.loss_offset(
             feature["offset"],
             target["offset_target"],
-        )
+        ).sum(dim=(3, 2, 1))
 
         return {
-            "loss_center_heatmap": loss_center_heatmap,
-            "loss_wh": loss_wh,
-            "loss_offset": loss_offset,
+            "loss_center_heatmap": loss_center_heatmap.mean(),
+            "loss_wh": loss_wh.mean(),
+            "loss_offset": loss_offset.mean(),
         }
 
     def get_targets(self, gt_bboxes, gt_labels, feat_shape, imgs_shape) -> Dict[str, torch.Tensor]:
