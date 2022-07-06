@@ -10,11 +10,16 @@ from amed.models.centernet import CenterNet
 
 
 def test_model():
-    images = torch.randn(16, 3, 512, 512)
-    model = CenterNet()
+    images = torch.randn(16, 3, 512, 512).clamp(min=0.0)
+    gt_bboxes = torch.Tensor([0.0260, 0.5886, 2.1809, 1.9412]).repeat(16, 1)
+    gt_labels = torch.randint(1, 5, (16,))
+    imgs_shape = torch.randint(500, 1000, (16, 3))
 
-    out = model(images)
+    model = CenterNet(num_classes=4)
 
-    assert out["heatmap"].shape == (16, 4, 128, 128)
-    assert out["wh"].shape == (16, 2, 128, 128)
-    assert out["offset"].shape == (16, 2, 128, 128)
+    feature = model(images)
+    loss = model.loss(feature, gt_bboxes, gt_labels, imgs_shape)
+
+    assert loss["loss_center_heatmap"].shape == (16, 4, 128, 128)
+    assert loss["loss_wh"].shape == (16, 2, 128, 128)
+    assert loss["loss_offset"].shape == (16, 2, 128, 128)

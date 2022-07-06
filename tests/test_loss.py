@@ -6,7 +6,7 @@ import torch
 current_dir = Path(__file__).resolve().parent
 sys.path.append(str(current_dir.parent))
 
-from amed.losses import L1Loss, GaussianFocalLoss
+from amed.losses import GaussianFocalLoss, L1Loss
 
 
 def test_l1loss():
@@ -19,6 +19,7 @@ def test_l1loss():
     loss = losses.mean()
 
     assert loss.item() > 0
+
 
 def test_gaussian_focal_loss():
     heatmap = torch.randn(16, 2, 128, 128)
