@@ -3,6 +3,7 @@ from typing import Tuple
 import cv2
 import torch
 from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
 
 from config import config
 
@@ -10,10 +11,10 @@ from .COCODataset import COCODataset
 
 
 class AMEDDataset(COCODataset):
-    def __init__(self, root, typ="train", transform=None, target_transform=None):
+    def __init__(self, root, typ="train", transform=None, target_transform=None) -> None:
         super().__init__(root, typ, transform, target_transform)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Tuple[torch.Tensor]:
         coco = self.coco
         img_id = self.ids[index]
         ann_ids = coco.getAnnIds(imgIds=img_id)
@@ -33,17 +34,17 @@ class AMEDDataset(COCODataset):
         else:
             bbox = torch.tensor(bbox)
 
-        return img, category
+        return img, bbox, category, img.shape
 
 
-def get_dataset(root, train_transform, valid_transform) -> Tuple[Dataset, Dataset]:
+def get_dataset(root: str, train_transform: transforms.Compose, valid_transform: transforms.Compose) -> Tuple[Dataset, Dataset]:
     traindataset = AMEDDataset(root=root, typ="train", transform=train_transform)
     valdataset = AMEDDataset(root=root, typ="validation", transform=valid_transform)
 
     return traindataset, valdataset
 
 
-def get_loader(train_dataset, valid_dataset, batch_size) -> Tuple[DataLoader, DataLoader]:
+def get_loader(train_dataset: Dataset, valid_dataset: Dataset, batch_size: int) -> Tuple[DataLoader, DataLoader]:
     train_loader = DataLoader(
         dataset=train_dataset,
         batch_size=batch_size,

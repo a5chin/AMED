@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 from torch import nn
@@ -18,10 +18,10 @@ from .modules import CenterNetHead, CTResNetNeck
 
 
 class CenterNet(nn.Module):
-    def __init__(self, num_classes: int = 4) -> None:
+    def __init__(self, num_classes: int = 4, backbone: Optional[nn.Module] = None) -> None:
         super().__init__()
         self.num_classes = num_classes
-        self.backbone = resnet18(pretrained=True)
+        self.backbone = resnet18(pretrained=True) if backbone is None else backbone
         self.neck = CTResNetNeck(
             in_channels=512,
             num_deconv_filters=(256, 128, 64),
@@ -256,9 +256,7 @@ class CenterNet(nn.Module):
 
     def _bboxes_nms(self, bboxes, labels, max_num: int = 100) -> Tuple[torch.Tensor]:
         if labels.numel() > 0:
-            bboxes, keep = batched_nms(
-                bboxes[:, :4], bboxes[:, -1].contiguous(), labels
-            )
+            bboxes, keep = batched_nms(bboxes[:, :4], bboxes[:, -1].contiguous(), labels)
             if max_num > 0:
                 bboxes = bboxes[:max_num]
                 labels = labels[keep][:max_num]
