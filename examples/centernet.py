@@ -21,9 +21,7 @@ def make_parser():
     parser.add_argument("--epochs", default=300, type=int, help="number of total epochs to run")
     parser.add_argument("--lr", default=0.05, type=float, help="initial (base) learning rate")
     parser.add_argument("--momentum", default=0.9, type=float, help="momentum of SGD solver")
-    parser.add_argument(
-        "-r", "--root", default="/work/hara.e/AMED/lib/dataset/images", type=str, help="please set data root"
-    )
+    parser.add_argument("-r", "--root", default="/work/hara.e/AMED/lib/dataset/images", type=str, help="please set data root")
     parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")
     parser.add_argument("--seed", default=1, type=int, help="seed for initializing training")
     parser.add_argument("--weight-decay", default=1e-4, type=float, help="weight decay (default: 1e-4)")
