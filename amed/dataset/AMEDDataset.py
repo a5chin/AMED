@@ -34,6 +34,7 @@ class AMEDDataset(COCODataset):
         else:
             bbox = torch.tensor(bbox)
 
+        category = torch.tensor(category)
         img_shape = torch.tensor(img.shape)
 
         return img, bbox, category, img_shape

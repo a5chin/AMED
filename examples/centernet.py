@@ -16,7 +16,7 @@ from amed.models.centernet import Trainer, get_transforms
 
 def make_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch-size", default=64, type=int, help="plese set batch-size")
+    parser.add_argument("--batch-size", default=16, type=int, help="plese set batch-size")
     parser.add_argument("--device", default="cuda:0", type=str, help="plese set device")
     parser.add_argument("--epochs", default=300, type=int, help="number of total epochs to run")
     parser.add_argument("--lr", default=0.05, type=float, help="initial (base) learning rate")
@@ -24,6 +24,7 @@ def make_parser():
     parser.add_argument(
         "-r", "--root", default="/work/hara.e/AMED/lib/dataset/images", type=str, help="please set data root"
     )
+    parser.add_argument("--logdir", default="logs", type=str, help="please set logdir")
     parser.add_argument("--seed", default=1, type=int, help="seed for initializing training")
     parser.add_argument("--weight-decay", default=1e-4, type=float, help="weight decay (default: 1e-4)")
 

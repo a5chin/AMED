@@ -26,7 +26,7 @@ class Trainer:
         self.losses = {"loss_center_heatmap": None, "loss_wh": None, "loss_offset": None}
 
     def fit(self, model: nn.Module):
-
+        model.to(self.cfg.device)
         for epoch in range(self.cfg.epochs):
             model.train()
 
