@@ -39,14 +39,13 @@ class GaussianFocalLoss(nn.Module):
         loss_weight (float): Loss weight of current loss.
     """
 
-    def __init__(self, alpha=2.0, gamma=4.0, reduction="mean", loss_weight=1.0):
+    def __init__(self, alpha=2.0, gamma=4.0, loss_weight=1.0):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
-        self.reduction = reduction
         self.loss_weight = loss_weight
 
-    def forward(self, pred, target, weight=None, avg_factor=None, reduction_override=None):
+    def forward(self, pred, target):
         """Forward function.
 
         Args:
@@ -55,22 +54,12 @@ class GaussianFocalLoss(nn.Module):
                 in gaussian distribution.
             weight (torch.Tensor, optional): The weight of loss for each
                 prediction. Defaults to None.
-            avg_factor (int, optional): Average factor that is used to average
-                the loss. Defaults to None.
-            reduction_override (str, optional): The reduction method used to
-                override the original reduction method of the loss.
-                Defaults to None.
         """
-        assert reduction_override in (None, "none", "mean", "sum")
-        reduction = reduction_override if reduction_override else self.reduction
         loss_reg = self.loss_weight * gaussian_focal_loss(
             pred,
             target,
-            weight,
             alpha=self.alpha,
             gamma=self.gamma,
-            reduction=reduction,
-            avg_factor=avg_factor,
         )
 
         return loss_reg

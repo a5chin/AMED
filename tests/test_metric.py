@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 current_dir = Path(__file__).resolve().parent
-sys.path.append(str(current_dir) + "/../")
+sys.path.append(str(current_dir.parent))
 
 from amed.utils import Metric
 
