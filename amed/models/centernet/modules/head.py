@@ -5,7 +5,9 @@ from torch import nn
 
 
 class CenterNetHead(nn.Module):
-    def __init__(self, in_channels: int = 64, feat_channels: int = 64, num_classes=4) -> None:
+    def __init__(
+        self, in_channels: int = 64, feat_channels: int = 64, num_classes=4
+    ) -> None:
         super().__init__()
         self.in_channels = in_channels
         self.feat_channels = feat_channels
@@ -16,8 +18,12 @@ class CenterNetHead(nn.Module):
             feat_channels=feat_channels,
             out_channels=num_classes,
         )
-        self.wh_head = CenterNetHead._build_head(in_channels=in_channels, feat_channels=feat_channels, out_channels=2)
-        self.offset_head = CenterNetHead._build_head(in_channels=in_channels, feat_channels=feat_channels, out_channels=2)
+        self.wh_head = CenterNetHead._build_head(
+            in_channels=in_channels, feat_channels=feat_channels, out_channels=2
+        )
+        self.offset_head = CenterNetHead._build_head(
+            in_channels=in_channels, feat_channels=feat_channels, out_channels=2
+        )
 
     @staticmethod
     def _build_head(in_channels, feat_channels, out_channels) -> nn.Module:

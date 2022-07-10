@@ -11,7 +11,9 @@ from .COCODataset import COCODataset
 
 
 class AMEDDataset(COCODataset):
-    def __init__(self, root, typ="train", transform=None, target_transform=None) -> None:
+    def __init__(
+        self, root, typ="train", transform=None, target_transform=None
+    ) -> None:
         super().__init__(root, typ, transform, target_transform)
 
     def __getitem__(self, index) -> Tuple[torch.Tensor]:
@@ -21,9 +23,17 @@ class AMEDDataset(COCODataset):
         target = coco.loadAnns(ann_ids)[0]
         file_name = coco.loadImgs(img_id)[0]["file_name"]
 
-        bbox, category, age, sex = target["bbox"], target["category_id"], target["age"], target["sex"]
+        bbox, category, age, sex = (
+            target["bbox"],
+            target["category_id"],
+            target["age"],
+            target["sex"],
+        )
 
-        img = cv2.imread(config.DATASET.IMAGES + file_name, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        img = cv2.imread(
+            config.DATASET.IMAGES + file_name,
+            cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION,
+        )
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         if self.transform is not None:
@@ -40,14 +50,18 @@ class AMEDDataset(COCODataset):
         return img, bbox, category, img_shape
 
 
-def get_dataset(root: str, train_transform: transforms.Compose, valid_transform: transforms.Compose) -> Tuple[Dataset, Dataset]:
+def get_dataset(
+    root: str, train_transform: transforms.Compose, valid_transform: transforms.Compose
+) -> Tuple[Dataset, Dataset]:
     traindataset = AMEDDataset(root=root, typ="train", transform=train_transform)
     valdataset = AMEDDataset(root=root, typ="validation", transform=valid_transform)
 
     return traindataset, valdataset
 
 
-def get_loader(train_dataset: Dataset, valid_dataset: Dataset, batch_size: int) -> Tuple[DataLoader, DataLoader]:
+def get_loader(
+    train_dataset: Dataset, valid_dataset: Dataset, batch_size: int
+) -> Tuple[DataLoader, DataLoader]:
     train_loader = DataLoader(
         dataset=train_dataset,
         batch_size=batch_size,

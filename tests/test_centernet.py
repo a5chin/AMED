@@ -4,7 +4,7 @@ from pathlib import Path
 import torch
 
 current_dir = Path(__file__).resolve().parent
-sys.path.append(str(current_dir.parent))
+sys.path.append(str(current_dir.parent.as_posix()))
 
 from amed.models.centernet import CenterNet
 

@@ -26,7 +26,9 @@ class CTResNetNeck(nn.Module):
         assert len(num_deconv_filters) == len(num_deconv_kernels)
         self.use_dcn = use_dcn
         self.in_channels = in_channels
-        self.deconv_layers = self._make_deconv_layer(num_deconv_filters, num_deconv_kernels)
+        self.deconv_layers = self._make_deconv_layer(
+            num_deconv_filters, num_deconv_kernels
+        )
 
     def _make_deconv_layer(self, num_deconv_filters, num_deconv_kernels):
         """use deconv layers to upsample backbone's output."""

@@ -23,7 +23,11 @@ class Trainer:
         self.optimizer, self.scheduler = optimizer, scheduler
 
         self.best_loss = float("inf")
-        self.losses = {"loss_center_heatmap": None, "loss_wh": None, "loss_offset": None}
+        self.losses = {
+            "loss_center_heatmap": None,
+            "loss_wh": None,
+            "loss_offset": None,
+        }
 
     def fit(self, model: nn.Module):
         model.to(self.cfg.device)
@@ -38,8 +42,12 @@ class Trainer:
                 pbar.set_description(f"[Epoch {epoch + 1}/{self.cfg.epochs}]")
 
                 for images, gt_bboxes, gt_labels, imgs_shape in pbar:
-                    images, imgs_shape = images.to(self.cfg.device), imgs_shape.to(self.cfg.device)
-                    gt_bboxes, gt_labels = gt_bboxes.to(self.cfg.device), gt_labels.to(self.cfg.device)
+                    images, imgs_shape = images.to(self.cfg.device), imgs_shape.to(
+                        self.cfg.device
+                    )
+                    gt_bboxes, gt_labels = gt_bboxes.to(self.cfg.device), gt_labels.to(
+                        self.cfg.device
+                    )
 
                     feature = model(images)
 
@@ -52,6 +60,8 @@ class Trainer:
 
                 for key in self.losses.keys():
                     self.writer.add_scalar(key, self.losses[key].avg, epoch + 1)
-                self.writer.add_scalar("train/lr", self.scheduler.get_last_lr()[0], epoch + 1)
+                self.writer.add_scalar(
+                    "train/lr", self.scheduler.get_last_lr()[0], epoch + 1
+                )
 
             self.scheduler.step()

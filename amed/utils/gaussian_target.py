@@ -36,7 +36,9 @@ def gen_gaussian_target(heatmap, center, radius, k=1):
         out_heatmap (Tensor): Updated heatmap covered by gaussian kernel.
     """
     diameter = 2 * radius + 1
-    gaussian_kernel = gaussian2D(radius, sigma=diameter / 6, dtype=heatmap.dtype, device=heatmap.device)
+    gaussian_kernel = gaussian2D(
+        radius, sigma=diameter / 6, dtype=heatmap.dtype, device=heatmap.device
+    )
 
     x, y = center
 
@@ -46,7 +48,9 @@ def gen_gaussian_target(heatmap, center, radius, k=1):
     top, bottom = min(y, radius), min(height - y, radius + 1)
 
     masked_heatmap = heatmap[y - top : y + bottom, x - left : x + right]
-    masked_gaussian = gaussian_kernel[radius - top : radius + bottom, radius - left : radius + right]
+    masked_gaussian = gaussian_kernel[
+        radius - top : radius + bottom, radius - left : radius + right
+    ]
     out_heatmap = heatmap
     torch.max(
         masked_heatmap,

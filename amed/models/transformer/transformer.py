@@ -12,7 +12,12 @@ class Transformer(nn.Module):
             self.layers.append(
                 nn.ModuleList(
                     [
-                        PreNorm(dim, MultiheadAttention(dim, heads=heads, dim_head=dim_head, dropout=dropout)),
+                        PreNorm(
+                            dim,
+                            MultiheadAttention(
+                                dim, heads=heads, dim_head=dim_head, dropout=dropout
+                            ),
+                        ),
                         PreNorm(dim, FeedForward(dim, mlp_dim, dropout=dropout)),
                     ]
                 )

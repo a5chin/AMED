@@ -9,14 +9,18 @@ def get_transforms(mode: str) -> Dict[str, transforms.Compose]:
             [
                 transforms.ToTensor(),
                 transforms.Resize((512, 512)),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
             ]
         ),
         "valid": transforms.Compose(
             [
                 transforms.ToTensor(),
                 transforms.Resize((512, 512)),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
             ]
         ),
     }

@@ -18,7 +18,9 @@ from .modules import CenterNetHead, CTResNetNeck
 
 
 class CenterNet(nn.Module):
-    def __init__(self, num_classes: int = 4, backbone: Optional[nn.Module] = None) -> None:
+    def __init__(
+        self, num_classes: int = 4, backbone: Optional[nn.Module] = None
+    ) -> None:
         super().__init__()
         self.num_classes = num_classes
         self.backbone = resnet18(pretrained=True) if backbone is None else backbone
@@ -27,7 +29,9 @@ class CenterNet(nn.Module):
             num_deconv_filters=(256, 128, 64),
             num_deconv_kernels=(4, 4, 4),
         )
-        self.bbox_head = CenterNetHead(in_channels=64, feat_channels=64, num_classes=num_classes)
+        self.bbox_head = CenterNetHead(
+            in_channels=64, feat_channels=64, num_classes=num_classes
+        )
 
         self.loss_center_haetmap = GaussianFocalLoss(loss_weight=1.0)
         self.loss_wh = L1Loss(loss_weight=0.1)
@@ -41,11 +45,19 @@ class CenterNet(nn.Module):
         return feature
 
     def loss(
-        self, feature: Dict[str, torch.Tensor], gt_bboxes: torch.Tensor, gt_labels: torch.Tensor, imgs_shape: torch.Tensor
+        self,
+        feature: Dict[str, torch.Tensor],
+        gt_bboxes: torch.Tensor,
+        gt_labels: torch.Tensor,
+        imgs_shape: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
-        target = self.get_targets(gt_bboxes, gt_labels, feature["heatmap"].shape, imgs_shape)
+        target = self.get_targets(
+            gt_bboxes, gt_labels, feature["heatmap"].shape, imgs_shape
+        )
 
-        loss_center_heatmap = self.loss_center_haetmap(feature["heatmap"], target["center_heatmap_target"]).sum(dim=(3, 2, 1))
+        loss_center_heatmap = self.loss_center_haetmap(
+            feature["heatmap"], target["center_heatmap_target"]
+        ).sum(dim=(3, 2, 1))
         loss_wh = self.loss_wh(feature["wh"], target["wh_target"]).sum(dim=(3, 2, 1))
         loss_offset = self.loss_offset(
             feature["offset"],
@@ -58,7 +70,9 @@ class CenterNet(nn.Module):
             "loss_offset": loss_offset.mean(),
         }
 
-    def get_targets(self, gt_bboxes, gt_labels, feat_shape, imgs_shape) -> Dict[str, torch.Tensor]:
+    def get_targets(
+        self, gt_bboxes, gt_labels, feat_shape, imgs_shape
+    ) -> Dict[str, torch.Tensor]:
         """Compute regression and classification targets in multiple images.
         Args:
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
@@ -83,7 +97,9 @@ class CenterNet(nn.Module):
         height_ratio = feat_h / imgs_shape[:, 1]
         width_ratio = feat_w / imgs_shape[:, 2]
 
-        center_heatmap_target = gt_bboxes[-1].new_zeros([bs, self.num_classes, feat_h, feat_w])
+        center_heatmap_target = gt_bboxes[-1].new_zeros(
+            [bs, self.num_classes, feat_h, feat_w]
+        )
         wh_target = gt_bboxes[:, -1].new_zeros([bs, 2, feat_h, feat_w])
         offset_target = gt_bboxes[:, -1].new_zeros([bs, 2, feat_h, feat_w])
         wh_offset_target_weight = gt_bboxes[:, -1].new_zeros([bs, 2, feat_h, feat_w])
@@ -100,7 +116,9 @@ class CenterNet(nn.Module):
             radius = gaussian_radius([scale_box_h, scale_box_w], min_overlap=0.3)
             radius = max(0, int(radius))
             ind = gt_labels[j] - 1
-            gen_gaussian_target(center_heatmap_target[j, ind, :, :], [ctx_int, cty_int], radius)
+            gen_gaussian_target(
+                center_heatmap_target[j, ind, :, :], [ctx_int, cty_int], radius
+            )
 
             wh_target[j, 0, cty_int, ctx_int] = scale_box_w
             wh_target[j, 1, cty_int, ctx_int] = scale_box_h
@@ -256,7 +274,9 @@ class CenterNet(nn.Module):
 
     def _bboxes_nms(self, bboxes, labels, max_num: int = 100) -> Tuple[torch.Tensor]:
         if labels.numel() > 0:
-            bboxes, keep = batched_nms(bboxes[:, :4], bboxes[:, -1].contiguous(), labels)
+            bboxes, keep = batched_nms(
+                bboxes[:, :4], bboxes[:, -1].contiguous(), labels
+            )
             if max_num > 0:
                 bboxes = bboxes[:max_num]
                 labels = labels[keep][:max_num]
