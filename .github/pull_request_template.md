@@ -1,7 +1,6 @@
 # Objective
 
 # Checks to be made before requesting a review
-
 - [ ] Confirmed that `Pytest` does not cause an error.
 - [ ] Fixed formatting in `Black`.
 - [ ] Fixed the import order in `Isort`.
