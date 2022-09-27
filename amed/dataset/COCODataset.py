@@ -1,17 +1,6 @@
-from __future__ import absolute_import, division, print_function
-
-import pathlib
-import sys
-import warnings
-
-current_dir = pathlib.Path(__file__).resolve().parent
-sys.path.append(str(current_dir) + "/../")
-warnings.filterwarnings("ignore")
-
 import json
 import logging
 import os
-import os.path
 from collections import OrderedDict, defaultdict
 
 import cv2
@@ -36,7 +25,13 @@ class COCODataset(Dataset):
             target and transforms it.
     """
 
-    def __init__(self, root: str = config.DATASET.ROOT, typ="train", transform=None, target_transform=None):
+    def __init__(
+        self,
+        root: str = config.DATASET.ROOT,
+        typ="train",
+        transform=None,
+        target_transform=None,
+    ):
         from pycocotools.coco import COCO
 
         self.name = "COCO"
@@ -54,7 +49,10 @@ class COCODataset(Dataset):
         self._class_to_ind = dict(zip(self.classes, range(self.num_classes)))
         self._class_to_coco_ind = dict(zip(cats, self.coco.getCatIds()))
         self._coco_ind_to_class_ind = dict(
-            [(self._class_to_coco_ind[cls], self._class_to_ind[cls]) for cls in self.classes[1:]]
+            [
+                (self._class_to_coco_ind[cls], self._class_to_ind[cls])
+                for cls in self.classes[1:]
+            ]
         )
 
     def _get_anno_file_name(self):
@@ -74,7 +72,10 @@ class COCODataset(Dataset):
 
         file_name = coco.loadImgs(img_id)[0]["file_name"]
 
-        img = cv2.imread(config.DATASET.IMAGES + file_name, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        img = cv2.imread(
+            config.DATASET.IMAGES + file_name,
+            cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION,
+        )
 
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -94,9 +95,13 @@ class COCODataset(Dataset):
         fmt_str += "    Number of datapoints: {}\n".format(self.__len__())
         fmt_str += "    Root Location: {}\n".format(self.root)
         tmp = "    Transforms (if any): "
-        fmt_str += "{0}{1}\n".format(tmp, self.transform.__repr__().replace("\n", "\n" + " " * len(tmp)))
+        fmt_str += "{0}{1}\n".format(
+            tmp, self.transform.__repr__().replace("\n", "\n" + " " * len(tmp))
+        )
         tmp = "    Target Transforms (if any): "
-        fmt_str += "{0}{1}".format(tmp, self.target_transform.__repr__().replace("\n", "\n" + " " * len(tmp)))
+        fmt_str += "{0}{1}".format(
+            tmp, self.target_transform.__repr__().replace("\n", "\n" + " " * len(tmp))
+        )
         return fmt_str
 
     def processKeypoints(self, keypoints):
@@ -105,7 +110,11 @@ class COCODataset(Dataset):
             p = keypoints[keypoints[:, 2] > 0][:, :2].mean(axis=0)
             num_keypoints = keypoints.shape[0]
             for i in range(num_keypoints):
-                tmp[i][0:3] = [float(keypoints[i][0]), float(keypoints[i][1]), float(keypoints[i][2])]
+                tmp[i][0:3] = [
+                    float(keypoints[i][0]),
+                    float(keypoints[i][1]),
+                    float(keypoints[i][2]),
+                ]
 
         return tmp
 
@@ -131,7 +140,9 @@ class COCODataset(Dataset):
             img_id = self.ids[idx]
             file_name = self.coco.loadImgs(img_id)[0]["file_name"]
             for idx_kpt, kpt in enumerate(_kpts):
-                area = (np.max(kpt[:, 0]) - np.min(kpt[:, 0])) * (np.max(kpt[:, 1]) - np.min(kpt[:, 1]))
+                area = (np.max(kpt[:, 0]) - np.min(kpt[:, 0])) * (
+                    np.max(kpt[:, 1]) - np.min(kpt[:, 1])
+                )
                 kpt = self.processKeypoints(kpt)
                 # if self.with_center:
                 if cfg.DATASET.WITH_CENTER and not cfg.TEST.IGNORE_CENTER:
@@ -209,8 +220,12 @@ class COCODataset(Dataset):
             if len(img_kpts) == 0:
                 continue
 
-            _key_points = np.array([img_kpts[k]["keypoints"] for k in range(len(img_kpts))])
-            key_points = np.zeros((_key_points.shape[0], num_joints * 3), dtype=np.float)
+            _key_points = np.array(
+                [img_kpts[k]["keypoints"] for k in range(len(img_kpts))]
+            )
+            key_points = np.zeros(
+                (_key_points.shape[0], num_joints * 3), dtype=np.float
+            )
 
             for ipt in range(num_joints):
                 key_points[:, ipt * 3 + 0] = _key_points[:, ipt, 0]
@@ -244,7 +259,18 @@ class COCODataset(Dataset):
         coco_eval.evaluate()
         coco_eval.accumulate()
         coco_eval.summarize()
-        stats_names = ["AP", "Ap .5", "AP .75", "AP (M)", "AP (L)", "AR", "AR .5", "AR .75", "AR (M)", "AR (L)"]
+        stats_names = [
+            "AP",
+            "Ap .5",
+            "AP .75",
+            "AP (M)",
+            "AP (L)",
+            "AR",
+            "AR .5",
+            "AR .75",
+            "AR (M)",
+            "AR (L)",
+        ]
 
         info_str = []
         for ind, name in enumerate(stats_names):

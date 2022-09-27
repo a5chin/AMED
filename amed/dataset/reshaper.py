@@ -26,7 +26,9 @@ class Reshaper:
     def __init__(self, root: str = config.DATASET.ROOT):
         self.root = Path(root) / "DICOM"
         self.path = [p for p in self.root.iterdir()]
-        self.images_path, self.annotations_path = Path(config.DATASET.IMAGES), Path(config.DATASET.ANNOTATIONS)
+        self.images_path, self.annotations_path = Path(config.DATASET.IMAGES), Path(
+            config.DATASET.ANNOTATIONS
+        )
         self.images_path.mkdir(exist_ok=True)
         self.annotations_path.mkdir(exist_ok=True)
         self.id = 0
@@ -42,7 +44,11 @@ class Reshaper:
                 "data_created": "2021/10/22",
             },
             "licenses": [
-                {"url": "https://www.amed.go.jp", "id": 1, "name": "Japan Agency for Medical Research and Development"}
+                {
+                    "url": "https://www.amed.go.jp",
+                    "id": 1,
+                    "name": "Japan Agency for Medical Research and Development",
+                }
             ],
             "images": [],
             "annotations": [],
@@ -66,7 +72,15 @@ class Reshaper:
             try:
                 ds = dcmread(p)
                 image = Image.fromarray(ds.pixel_array)
-                info = pd.read_csv(str(path / path.stem) + ".csv", header=None, encoding="shift-jis").values[0].tolist()
+                info = (
+                    pd.read_csv(
+                        str(path / path.stem) + ".csv",
+                        header=None,
+                        encoding="shift-jis",
+                    )
+                    .values[0]
+                    .tolist()
+                )
                 width, height = image.size
                 if height > 400 and width > 400 and info[13] in self.name:
                     _hash = phash(image)
@@ -92,7 +106,9 @@ class Reshaper:
                                         "iscrowd": 0,
                                         "image_id": self.id,
                                         "bbox": points,
-                                        "category_id": self._convert_diagnosis(info[13]),
+                                        "category_id": self._convert_diagnosis(
+                                            info[13]
+                                        ),
                                         "id": self.id,
                                         "age": info[8],
                                         "sex": 1 if ds.PatientSex == "M" else 0,
@@ -101,7 +117,9 @@ class Reshaper:
 
                                 self.hashes.append(_hash)
                                 image = self._remove_noises(image)
-                                image.save(self.images_path / (str(self.id).zfill(6) + ".jpg"))
+                                image.save(
+                                    self.images_path / (str(self.id).zfill(6) + ".jpg")
+                                )
                                 self.id += 1
             except:
                 pass
@@ -109,7 +127,9 @@ class Reshaper:
     def _in_same_image(self, _hash: imagehash.ImageHash) -> bool:
         return sum(1 for it in self.hashes if it - _hash < 2) != 0
 
-    def _remove_noises(self, image: Image.Image, kernel_size: int = 3, random_range: tuple = (-3, 3)) -> Image.Image:
+    def _remove_noises(
+        self, image: Image.Image, kernel_size: int = 3, random_range: tuple = (-3, 3)
+    ) -> Image.Image:
         img = np.asarray(image, dtype=np.uint8)
 
         try:
@@ -127,7 +147,9 @@ class Reshaper:
             y_min, y_max = y - kernel_size, y + kernel_size
             if x_min < 0 or width < x_max or y_min < 0 or height < y_max:
                 continue
-            img[x, y] = np.median(img[x_min:x_max, y_min:y_max]) + random.randint(*random_range)
+            img[x, y] = np.median(img[x_min:x_max, y_min:y_max]) + random.randint(
+                *random_range
+            )
 
         return Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
