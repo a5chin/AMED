@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 current_dir = Path(__file__).resolve().parent
-sys.path.append(str(current_dir) + "/../")
+sys.path.append(str(current_dir.parent.as_posix()))
 
 from test_resnet import test_resnet
 
