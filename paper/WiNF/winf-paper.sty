@@ -1,0 +1,148 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% winf-paper.sty
+% 情報学ワークショップ（WiNF）論文本体 スタイルファイル
+%
+% @author: Hidekazu Suzuki (hsuzuki@meijo-u.ac.jp)
+% @version: 1.0 (2015/09/15)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ページ設定
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\topmargin=-1.6cm
+\headsep=3cm
+\footskip=3cm
+\textwidth=16.5cm
+\textheight=23.3cm
+\oddsidemargin=-3mm
+\evensidemargin=-3mm
+\columnsep=0.8cm
+\headsep=1.75cm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 行間の設定
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\baselinestretch}{1.25}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ページ番号を出力しない
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% タイトル情報の定義
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\affiliation}[1]{\def\@affiliation{#1}}	% 和文所属
+\newcommand{\DAG}[1]{$^{\dagger#1}$}	% 所属を示す上付きダガー
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% タイトルのフォーマット
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\@maketitle{%
+	\newpage\null
+	\begin{center}%
+		\gtfamily\sffamily	% タイトルのフォントをゴシックとサンセリフフォントに設定
+		\vskip -1.0em	% タイトルの掲載位置の調整
+		{\fontsize{12truept}{0truept}\selectfont \@title \par}	% 和文題目のフォントサイズ=12pt（行送り=0pt）
+		\vskip 0.8em	% 題目と著者の間隔
+		{\fontsize{10.5truept}{0truept}\selectfont	% 和文著者のフォントサイズ=10.5pt
+			\begin{tabular}[t]{c}%
+				\@author	% 和文著者
+			\end{tabular}\par}%
+		\vskip 0.8em	% 著者と所属の間隔
+		{\fontsize{10.5truept}{0truept}\selectfont \@affiliation \par}%	% 和文所属のフォントサイズ=10.5pt
+
+	\end{center}%
+	\vskip 1.5em	% タイトルと本文の間隔
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 章節見出しの間隔調整
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+	{3.5ex \@plus 1ex \@minus .2ex}%
+	{2.3ex \@plus.2ex}%
+	{\reset@font\fontsize{10truept}{10truept}\selectfont\sffamily\gtfamily}}	% 章見出しのフォントサイズ=10pt
+\renewcommand\subsection{\@startsection{subsection}{1}{\z@}%
+	{3.5ex \@plus 1ex \@minus .2ex}%
+	{0.1ex \@plus.2ex}%
+	{\reset@font\fontsize{9truept}{9truept}\selectfont\sffamily\gtfamily}}	% 節見出しのフォントサイズ=9pt
+\renewcommand\subsubsection{\@startsection{subsubsection}{1}{\z@}%
+	{3.5ex \@plus 1ex \@minus .2ex}%
+	{0.1ex \@plus.2ex}%
+	{\reset@font\normalsize\sffamily\gtfamily}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 箇条書きの上下間隔の設定
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% 番号なし箇条書き
+\renewenvironment{itemize}{
+	\begin{list}{\textbullet}{%
+			\topsep\z@
+			\parskip\z@
+			\partopsep\z@
+			\leftmargin1.5zw
+			\labelwidth0zw
+			\labelsep0.5zw
+			\itemindent0zw
+			\listparindent1zw
+		}
+	}{
+\end{list}
+}
+
+%% 番号付き箇条書き
+\renewcommand{\labelenumi}{(\theenumi)} %enumerateのitemを(1)とする
+\renewenvironment{enumerate}[1][\z@]
+{\ifnum \@enumdepth >3\relax\@toodeep\else
+	\advance\@enumdepth\@ne
+	\edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+	\list{\csname label\@enumctr\endcsname}{%
+		\topsep\z@
+		\parskip\z@
+		\itemsep\z@
+		\parsep\z@
+		\leftmargin#1 \advance\leftmargin 2.0zw
+		\labelwidth0zw
+		\labelsep0.5zw
+		\itemindent0zw
+		\listparindent1zw
+		\usecounter{\@enumctr}%
+		\def\makelabel##1{\hss\llap{##1}}
+	}%
+	\fi
+}{
+\endlist
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 図表
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\figurename}{図}
+\renewcommand{\tablename}{表}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 参考文献
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\refname}{参考文献}
+
+\renewenvironment{thebibliography}[1]
+{\section*{\refname
+		\@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}}%
+	\list{\@biblabel{\@arabic\c@enumiv}}%
+	{\settowidth\labelwidth{\@biblabel{#1}}%
+		\leftmargin\labelwidth
+		\advance\leftmargin\labelsep
+		\setlength\itemsep{0zh}%	% 参考文献の行間隔を詰める
+		\@openbib@code
+		\usecounter{enumiv}%
+		\let\p@enumiv\@empty
+		\renewcommand\theenumiv{\@arabic\c@enumiv}}%
+	\sloppy\clubpenalty4000\widowpenalty4000%
+	\sfcode`\.\@m}
+{\def\@noitemerr
+	{\@latex@warning{Empty `thebibliography' environment}}%
+	\endlist}
