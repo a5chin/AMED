@@ -29,7 +29,6 @@ class SimSiam(nn.Module):
         dim: int = 2048,
         pred_dim: int = 512,
     ) -> None:
-
         super().__init__()
 
         self.dim = dim
